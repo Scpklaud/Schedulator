@@ -52,36 +52,8 @@ function getClient() {
 
   // Refresh the token if it's expired.
   if ($client->isAccessTokenExpired()) {
-    $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-    file_put_contents($credentialsPath, json_encode($client->getAccessToken()));
-  }
-  return $client;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-//////////////////////////////////////////CONSULTA////////////////////////////////////////
-
-/**
- * Expands the home directory alias '~' to the full path.
- * @param string $path the path to expand.
- * @return string the expanded path.
- */
-function expandHomeDirectory($path) {
-  $homeDirectory = getenv('HOME');
-  if (empty($homeDirectory)) {
-    $homeDirectory = getenv('HOMEDRIVE') . getenv('HOMEPATH');
-  }
-  return str_replace('~', realpath($homeDirectory), $path);
-}
-
-// Get the API client and construct the service object.
-$client = getClient();
-$service = new Google_Service_Calendar($client);
-
+    $client->fetchAcce
+    
 // Print the next 10 events on the user's calendar.
 $calendarId = 'mediastream.cl_lkq6aii5aai7eb6edpdj213158@group.calendar.google.com';
 $optParams = array(
@@ -105,4 +77,4 @@ if (count($results->getItems()) == 0) {
     printf("Event:%s-Start:%s-End:%s\n", $event->getSummary(), $start, $end);
   }
 
-}
+
