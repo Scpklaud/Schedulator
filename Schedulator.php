@@ -2,20 +2,20 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-//////
+
 define('APPLICATION_NAME', 'Schedulator MDSTRM');
-define('CREDENTIALS_PATH', '~/.credentials/calendar-php-quickstart.json');
+define('CREDENTIALS_PATH', '/root/.credentials/calendar-php-quickstart.json');
 define('CLIENT_SECRET_PATH', __DIR__ . '/client_secret.json');
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/calendar-php-quickstart.json
-define('SCOPES', implode(' ', array(Google_Service_Calendar::CALENDAR_READONLY)
+define('SCOPES', implode(' ', array(
+  Google_Service_Calendar::CALENDAR_READONLY)
 ));
 
 if (php_sapi_name() != 'cli') {
   throw new Exception('This application must be run on the command line.');
 }
 
-//////////////////////////////////CONEXION////////////////////////////////////////
 /**
  * Returns an authorized API client.
  * @return Google_Client the authorized client object
@@ -52,29 +52,63 @@ function getClient() {
 
   // Refresh the token if it's expired.
   if ($client->isAccessTokenExpired()) {
-    $client->fetchAcce
-    
-// Print the next 10 events on the user's calendar.
+    $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+    file_put_contents($credentialsPath, json_encode($client->getAccessToken()));
+  }
+  return $client;
+}
+
+/**
+ * Expands the home directory alias '~' to the full path.
+ * @param string $path the path to expand.
+ * @return string the expanded path.
+ */
+function expandHomeDirectory($path) {
+  $homeDirectory = getenv('HOME');
+  if (empty($homeDirectory)) {
+    $homeDirectory = getenv('HOMEDRIVE') . getenv('HOMEPATH');
+  }
+  return str_replace('~', realpath($homeDirectory), $path);
+}
+
+
+
+
+
+//Construcción del cliente 
+$client = getClient();
+//Inicio del servicio Calendar
+$service = new Google_Service_Calendar($client);
+
+
+
+//Obtención del calendario
 $calendarId = 'mediastream.cl_lkq6aii5aai7eb6edpdj213158@group.calendar.google.com';
 $optParams = array(
-  'maxResults' => 11,
+  //Cantidad de eventos que necesito mostrar
+  'maxResults' => 10,
+  //Orden por inicio del evento
   'orderBy' => 'startTime',
   'singleEvents' => TRUE,
   'timeMin' => date('c'),
 );
+//Creación del arreglo de eventoss
 $results = $service->events->listEvents($calendarId, $optParams);
 
+
+
+
+//Tratamiento 
 if (count($results->getItems()) == 0) {
   print "No upcoming events found.\n";
 } else {
   print "Upcoming events:\n";
   foreach ($results->getItems() as $event) {
     $start = $event->start->dateTime;
-    $end = $event->end->dateTime;
+    $end = $event->start->dateTime;
     if (empty($start)) {
       $start = $event->start->date;
     }
-    printf("Event:%s-Start:%s-End:%s\n", $event->getSummary(), $start, $end);
+    printf("EVENT:%s;START:%s;,END:%s\n", $event->getSummary(), $start,$end);
   }
-
-
+}
